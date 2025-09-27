@@ -1,6 +1,7 @@
 'use client';
 import { useMemo, useState } from 'react';
 import { RecipeCard } from '../components/RecipeCard';
+import { useRecipeCommentCounts } from '../hooks/useRecipeCommentCounts';
 import { useRecipeRatingCounts } from '../hooks/useRecipeRatingCounts';
 import { useRecipeRatings } from '../hooks/useRecipeRatings';
 import { useRecipes } from '../hooks/useRecipes';
@@ -13,6 +14,7 @@ export default function HomePage() {
   const recipeIds = useMemo(() => recipes.map((r) => r.id), [recipes]);
   const ratings = useRecipeRatings(recipeIds);
   const ratingCounts = useRecipeRatingCounts(recipeIds);
+  const commentCounts = useRecipeCommentCounts(recipeIds);
   const handleDelete = async (id: string) => {
     const { doc, deleteDoc } = await import('firebase/firestore');
     const { db } = await import('../lib/firebase');
@@ -62,7 +64,7 @@ export default function HomePage() {
           recipe={recipe}
           avgRating={ratings[recipe.id] ?? 0}
           ratingCount={ratingCounts[recipe.id] ?? 0}
-          commentCount={0}
+          commentCount={commentCounts[recipe.id] ?? 0}
           onDelete={handleDelete}
         />
       ))}
