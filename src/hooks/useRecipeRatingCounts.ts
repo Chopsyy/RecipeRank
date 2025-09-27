@@ -2,6 +2,9 @@ import { collection, onSnapshot } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { db } from '../lib/firebase';
 
+// Global cache
+let ratingCountsCache: Record<string, number> = {};
+
 export function useRecipeRatingCounts(recipeIds: string[]) {
   const [counts, setCounts] = useState<Record<string, number>>({});
 
@@ -13,7 +16,8 @@ export function useRecipeRatingCounts(recipeIds: string[]) {
       const ref = collection(db, 'recipes', id, 'ratings');
       const unsub = onSnapshot(ref, (snap) => {
         newCounts[id] = snap.docs.length;
-        setCounts({ ...newCounts });
+        ratingCountsCache = { ...ratingCountsCache, ...newCounts };
+        setCounts({ ...ratingCountsCache });
       });
       unsubscribers.push(unsub);
     });

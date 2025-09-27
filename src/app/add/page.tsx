@@ -1,7 +1,6 @@
 'use client';
 import { useAuthUser } from '@/hooks/useAuthUser';
 import { addDoc, collection, Timestamp } from 'firebase/firestore';
-import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { db } from '../../lib/firebase';
 import { supabase } from '../../lib/supabase';
@@ -9,7 +8,6 @@ import styles from '../../styles/AddRecipe.module.scss';
 
 export default function AddRecipePage() {
   const user = useAuthUser();
-  const router = useRouter();
   const commonUnits = [
     'g',
     'kg',
@@ -41,13 +39,20 @@ export default function AddRecipePage() {
     try {
       const text = await navigator.clipboard.readText();
       setImageUrlInput(text);
-    } catch (err) {
+    } catch {
       alert('Failed to read clipboard');
     }
   };
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [ingredients, setIngredients] = useState([
+  type Ingredient = {
+    name: string;
+    quantity: string;
+    unit: string;
+    customUnit?: string;
+  };
+
+  const [ingredients, setIngredients] = useState<Ingredient[]>([
     { name: '', quantity: '', unit: '' },
   ]);
   const [imageType, setImageType] = useState<'url' | 'file'>('url');

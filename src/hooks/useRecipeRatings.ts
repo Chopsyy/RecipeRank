@@ -2,6 +2,9 @@ import { collection, onSnapshot } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { db } from '../lib/firebase';
 
+// Global cache
+let ratingsCache: Record<string, number> = {};
+
 export function useRecipeRatings(recipeIds: string[]) {
   const [ratings, setRatings] = useState<Record<string, number>>({});
 
@@ -16,7 +19,8 @@ export function useRecipeRatings(recipeIds: string[]) {
         newRatings[id] = scores.length
           ? scores.reduce((a, b) => a + b, 0) / scores.length
           : 0;
-        setRatings({ ...newRatings });
+        ratingsCache = { ...ratingsCache, ...newRatings };
+        setRatings({ ...ratingsCache });
       });
       unsubscribers.push(unsub);
     });

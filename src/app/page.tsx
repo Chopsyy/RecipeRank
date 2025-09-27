@@ -14,6 +14,18 @@ export default function HomePage() {
     const { doc, deleteDoc } = await import('firebase/firestore');
     const { db } = await import('../lib/firebase');
     await deleteDoc(doc(db, 'recipes', id));
+    // Invalidate recipes cache after deletion
+    if (typeof window !== 'undefined') {
+      // @ts-expect-error: recipesCache is a custom property added to window for caching recipes
+      if (window.recipesCache !== undefined) window.recipesCache = null;
+    }
+    try {
+      // Also try to invalidate imported cache
+      const useRecipesModule = await import('../hooks/useRecipes');
+      if (useRecipesModule && 'recipesCache' in useRecipesModule) {
+        useRecipesModule.recipesCache = null;
+      }
+    } catch {}
   };
   return (
     <div className={styles.container}>

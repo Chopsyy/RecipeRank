@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Image from 'next/image';
 import React from 'react';
 import styles from '../styles/RecipeCard.module.scss';
 import { Recipe } from '../types/Recipe';
@@ -18,14 +18,16 @@ export const RecipeCard: React.FC<Props> = ({
   onDelete,
 }) => {
   // Type guard for new ingredient object
-  const isIngredientObj = (
-    ing: any
-  ): ing is {
+  type IngredientObj = {
     name: string;
     quantity: string;
     unit: string;
     customUnit?: string;
-  } => {
+  };
+
+  const isIngredientObj = (
+    ing: IngredientObj | string
+  ): ing is IngredientObj => {
     return (
       typeof ing === 'object' &&
       ing !== null &&
@@ -35,11 +37,18 @@ export const RecipeCard: React.FC<Props> = ({
     );
   };
   return (
-    <div className={styles.card} style={{ position: 'relative' }}>
+    <a
+      href={`/recipe/${recipe.id}`}
+      className={styles.card}
+      style={{ position: 'relative', textDecoration: 'none', color: 'inherit' }}
+    >
       {onDelete && (
         <button
           className={styles.trashButton}
-          onClick={() => onDelete(recipe.id)}
+          onClick={(e) => {
+            e.preventDefault();
+            onDelete(recipe.id);
+          }}
           aria-label="Delete recipe"
         >
           <svg
@@ -56,42 +65,43 @@ export const RecipeCard: React.FC<Props> = ({
           </svg>
         </button>
       )}
-      <Link href={`/recipe/${recipe.id}`} className={styles.cardLink}>
-        {recipe.imageUrl && (
-          <img
-            src={recipe.imageUrl}
-            alt={recipe.title}
-            className={styles.image}
-          />
-        )}
-        <div className={styles.headerSection}>
-          <h2 className={styles.title}>{recipe.title}</h2>
-        </div>
-        <div className={styles.ingredientsSection}>
-          <h4 className={styles.ingredientsLabel}>Ingredients</h4>
-          <ul className={styles.ingredientsList}>
-            {recipe.ingredients.map((ing: any, i: number) => (
-              <li key={i} className={styles.ingredient}>
-                {isIngredientObj(ing)
-                  ? `${ing.quantity} ${
-                      ing.unit === 'custom' && ing.customUnit
-                        ? ing.customUnit
-                        : ing.unit
-                    } ${ing.name}`.trim()
-                  : ing}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <p className={styles.description}>{recipe.description}</p>
-        <div className={styles.meta}>
-          <span>
-            ⭐ {avgRating.toFixed(1)}
-            {ratingCount > 0 ? ` (${ratingCount})` : ''}
-          </span>
-          <span>💬 {commentCount}</span>
-        </div>
-      </Link>
-    </div>
+      {recipe.imageUrl && (
+        <Image
+          src={recipe.imageUrl}
+          alt={recipe.title}
+          className={styles.image}
+          width={400}
+          height={300}
+          priority
+        />
+      )}
+      <div className={styles.headerSection}>
+        <h2 className={styles.title}>{recipe.title}</h2>
+      </div>
+      <div className={styles.ingredientsSection}>
+        <h4 className={styles.ingredientsLabel}>Ingredients</h4>
+        <ul className={styles.ingredientsList}>
+          {recipe.ingredients.map((ing: IngredientObj | string, i: number) => (
+            <li key={i} className={styles.ingredient}>
+              {isIngredientObj(ing)
+                ? `${ing.quantity} ${
+                    ing.unit === 'custom' && ing.customUnit
+                      ? ing.customUnit
+                      : ing.unit
+                  } ${ing.name}`.trim()
+                : ing}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <p className={styles.description}>{recipe.description}</p>
+      <div className={styles.meta}>
+        <span>
+          ⭐ {avgRating.toFixed(1)}
+          {ratingCount > 0 ? ` (${ratingCount})` : ''}
+        </span>
+        <span>💬 {commentCount}</span>
+      </div>
+    </a>
   );
 };

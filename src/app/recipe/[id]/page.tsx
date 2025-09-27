@@ -10,8 +10,7 @@ import {
   addDoc,
   collection,
   doc,
-  getDoc,
-  getDocs,
+  onSnapshot,
   Timestamp,
 } from 'firebase/firestore';
 import Image from 'next/image';
@@ -22,6 +21,8 @@ export default function RecipeDetailPage() {
   const params = useParams();
   const id = params?.id as string;
   const [recipe, setRecipe] = useState<Recipe | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [score, setScore] = useState(1);
@@ -31,33 +32,58 @@ export default function RecipeDetailPage() {
 
   useEffect(() => {
     if (!id) return;
-    getDoc(doc(db, 'recipes', id)).then(
+    setLoading(true);
+    setError(null);
+    // Listen for recipe changes
+    const unsubRecipe = onSnapshot(
+      doc(db, 'recipes', id),
       (docSnap: import('firebase/firestore').DocumentSnapshot) => {
-        setRecipe(
-          docSnap.exists()
-            ? ({ id: docSnap.id, ...docSnap.data() } as Recipe)
-            : null
+        if (docSnap.exists()) {
+          setRecipe({ id: docSnap.id, ...docSnap.data() } as Recipe);
+          setError(null);
+        } else {
+          setError('Recipe not found.');
+          setRecipe(null);
+        }
+        setLoading(false);
+      },
+      () => {
+        setError('Error loading recipe.');
+        setRecipe(null);
+        setLoading(false);
+      }
+    );
+    // Listen for ratings changes
+    const ratingsRef = collection(db, 'recipes', id, 'ratings');
+    const unsubRatings = onSnapshot(
+      ratingsRef,
+      (snap: import('firebase/firestore').QuerySnapshot) => {
+        setRatings(
+          snap.docs.map(
+            (d: import('firebase/firestore').QueryDocumentSnapshot) =>
+              ({ id: d.id, ...d.data() } as Rating)
+          )
         );
       }
     );
-    const ratingsRef = collection(db, 'recipes', id, 'ratings');
+    // Listen for comments changes
     const commentsRef = collection(db, 'recipes', id, 'comments');
-    getDocs(ratingsRef).then((snap) => {
-      setRatings(
-        snap.docs.map(
-          (d: import('firebase/firestore').QueryDocumentSnapshot) =>
-            ({ id: d.id, ...d.data() } as Rating)
-        )
-      );
-    });
-    getDocs(commentsRef).then((snap) => {
-      setComments(
-        snap.docs.map(
-          (d: import('firebase/firestore').QueryDocumentSnapshot) =>
-            ({ id: d.id, ...d.data() } as Comment)
-        )
-      );
-    });
+    const unsubComments = onSnapshot(
+      commentsRef,
+      (snap: import('firebase/firestore').QuerySnapshot) => {
+        setComments(
+          snap.docs.map(
+            (d: import('firebase/firestore').QueryDocumentSnapshot) =>
+              ({ id: d.id, ...d.data() } as Comment)
+          )
+        );
+      }
+    );
+    return () => {
+      unsubRecipe();
+      unsubRatings();
+      unsubComments();
+    };
   }, [id]);
 
   const avgRating = ratings.length
@@ -84,7 +110,9 @@ export default function RecipeDetailPage() {
     setCommentUser('');
   };
 
-  if (!recipe) return <div>Loading...</div>;
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div style={{ color: 'red' }}>{error}</div>;
+  if (!recipe) return null;
 
   return (
     <div className={styles.detail}>
@@ -105,21 +133,23 @@ export default function RecipeDetailPage() {
       <div className={styles.ingredientsSection}>
         <h3 className={styles.ingredientsLabel}>Ingredients</h3>
         <ul className={styles.ingredientsList}>
-          {recipe.ingredients.map((ing: any, i: number) => (
-            <li key={i} className={styles.ingredient}>
-              {typeof ing === 'object' &&
-              ing !== null &&
-              'name' in ing &&
-              'quantity' in ing &&
-              'unit' in ing
-                ? `${ing.quantity} ${
-                    ing.unit === 'custom' && ing.customUnit
-                      ? ing.customUnit
-                      : ing.unit
-                  } ${ing.name}`.trim()
-                : ing}
-            </li>
-          ))}
+          {recipe.ingredients.map(
+            (ing: import('@/types/Recipe').Ingredient, i: number) => (
+              <li key={i} className={styles.ingredient}>
+                {typeof ing === 'object' &&
+                ing !== null &&
+                'name' in ing &&
+                'quantity' in ing &&
+                'unit' in ing
+                  ? `${ing.quantity} ${
+                      ing.unit === 'custom' && ing.customUnit
+                        ? ing.customUnit
+                        : ing.unit
+                    } ${ing.name}`.trim()
+                  : ing}
+              </li>
+            )
+          )}
         </ul>
       </div>
       <div className={styles.section}>
