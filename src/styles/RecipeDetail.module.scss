@@ -36,18 +36,17 @@
   color: #90cdf4;
 }
 .ingredientsList {
-  list-style: none;
-  padding: 0;
+  list-style: disc inside;
+  padding-left: 1.2rem;
   margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1rem;
+  display: block;
+  gap: 0;
 }
 .ingredient {
-  background: #232326;
-  border-radius: 4px;
-  padding: 0.25rem 0.75rem;
-  font-size: 0.95rem;
+  background: none;
+  border-radius: 0;
+  padding: 0.15rem 0;
+  font-size: 1rem;
   color: #e0e0e0;
 }
 .description {

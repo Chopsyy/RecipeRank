@@ -6,6 +6,32 @@ import { supabase } from '../../lib/supabase';
 import styles from '../../styles/AddRecipe.module.scss';
 
 export default function AddRecipePage() {
+  const commonUnits = [
+    'g',
+    'kg',
+    'ml',
+    'l',
+    'TL',
+    'EL',
+    'Stück',
+    'Prise',
+    'Bund',
+    'Dose',
+    'Päckchen',
+    'Scheibe',
+    'Tasse',
+    'Becher',
+    'cm',
+    'Msp.',
+    'Schuss',
+    'Spritzer',
+    'Würfel',
+    'Kugel',
+    'Blatt',
+    'Zehe',
+    'Handvoll',
+    'custom',
+  ];
   // Paste clipboard content into imageUrlInput
   const handlePasteImageUrl = async () => {
     try {
@@ -17,7 +43,9 @@ export default function AddRecipePage() {
   };
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [ingredients, setIngredients] = useState('');
+  const [ingredients, setIngredients] = useState([
+    { name: '', quantity: '', unit: '' },
+  ]);
   const [imageType, setImageType] = useState<'url' | 'file'>('url');
   const [imageUrlInput, setImageUrlInput] = useState('');
   const [image, setImage] = useState<File | null>(null);
@@ -53,13 +81,13 @@ export default function AddRecipePage() {
     await addDoc(collection(db, 'recipes'), {
       title,
       description,
-      ingredients: ingredients.split('\n'),
+      ingredients,
       imageUrl,
       createdAt: Timestamp.now().toDate().toISOString(),
     });
     setTitle('');
     setDescription('');
-    setIngredients('');
+    setIngredients([{ name: '', quantity: '', unit: '' }]);
     setImage(null);
     setImageUrlInput('');
     setImageType('url');
@@ -140,14 +168,106 @@ export default function AddRecipePage() {
           />
         </div>
         <div className={styles.field + ' ' + styles.full}>
-          <label htmlFor="ingredients">Ingredients (one per line)</label>
-          <textarea
-            id="ingredients"
-            value={ingredients}
-            onChange={(e) => setIngredients(e.target.value)}
-            placeholder="Ingredients (one per line)"
-            required
-          />
+          <label>Ingredients</label>
+          {ingredients.map((ing, idx) => (
+            <div
+              key={idx}
+              style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}
+            >
+              <input
+                type="text"
+                placeholder="Name"
+                value={ing.name}
+                onChange={(e) => {
+                  const newIngredients = [...ingredients];
+                  newIngredients[idx].name = e.target.value;
+                  setIngredients(newIngredients);
+                }}
+                required
+                style={{ flex: 2 }}
+              />
+              <input
+                type="text"
+                placeholder="Menge (z.B. 200)"
+                value={ing.quantity}
+                onChange={(e) => {
+                  const newIngredients = [...ingredients];
+                  newIngredients[idx].quantity = e.target.value;
+                  setIngredients(newIngredients);
+                }}
+                required
+                style={{ flex: 1 }}
+              />
+              <select
+                value={ing.unit}
+                onChange={(e) => {
+                  const newIngredients = [...ingredients];
+                  newIngredients[idx].unit = e.target.value;
+                  setIngredients(newIngredients);
+                }}
+                required
+                style={{ flex: 1 }}
+              >
+                <option value="">Einheit wählen</option>
+                {commonUnits.map((unit) => (
+                  <option key={unit} value={unit}>
+                    {unit === 'custom' ? 'Andere...' : unit}
+                  </option>
+                ))}
+              </select>
+              {ing.unit === 'custom' && (
+                <input
+                  type="text"
+                  placeholder="Eigene Einheit"
+                  value={ing.customUnit || ''}
+                  onChange={(e) => {
+                    const newIngredients = [...ingredients];
+                    newIngredients[idx].customUnit = e.target.value;
+                    setIngredients(newIngredients);
+                  }}
+                  style={{ flex: 1 }}
+                />
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  setIngredients(ingredients.filter((_, i) => i !== idx));
+                }}
+                style={{
+                  background: '#e74c3c',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  padding: '0 0.5rem',
+                  cursor: 'pointer',
+                }}
+                aria-label="Remove ingredient"
+                disabled={ingredients.length === 1}
+              >
+                &times;
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() =>
+              setIngredients([
+                ...ingredients,
+                { name: '', quantity: '', unit: '' },
+              ])
+            }
+            style={{
+              background: '#3498db',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '0.3rem 0.7rem',
+              cursor: 'pointer',
+              marginTop: '0.5rem',
+            }}
+          >
+            + Add Ingredient
+          </button>
         </div>
         <button type="submit" disabled={loading} className={styles.full}>
           {loading ? 'Adding...' : 'Add Recipe'}

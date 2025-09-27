@@ -11,7 +11,7 @@ import {
   collection,
   doc,
   getDoc,
-  onSnapshot,
+  getDocs,
   Timestamp,
 } from 'firebase/firestore';
 import Image from 'next/image';
@@ -42,32 +42,22 @@ export default function RecipeDetailPage() {
     );
     const ratingsRef = collection(db, 'recipes', id, 'ratings');
     const commentsRef = collection(db, 'recipes', id, 'comments');
-    const unsubRatings = onSnapshot(
-      ratingsRef,
-      (snap: import('firebase/firestore').QuerySnapshot) => {
-        setRatings(
-          snap.docs.map(
-            (d: import('firebase/firestore').QueryDocumentSnapshot) =>
-              ({ id: d.id, ...d.data() } as Rating)
-          )
-        );
-      }
-    );
-    const unsubComments = onSnapshot(
-      commentsRef,
-      (snap: import('firebase/firestore').QuerySnapshot) => {
-        setComments(
-          snap.docs.map(
-            (d: import('firebase/firestore').QueryDocumentSnapshot) =>
-              ({ id: d.id, ...d.data() } as Comment)
-          )
-        );
-      }
-    );
-    return () => {
-      unsubRatings();
-      unsubComments();
-    };
+    getDocs(ratingsRef).then((snap) => {
+      setRatings(
+        snap.docs.map(
+          (d: import('firebase/firestore').QueryDocumentSnapshot) =>
+            ({ id: d.id, ...d.data() } as Rating)
+        )
+      );
+    });
+    getDocs(commentsRef).then((snap) => {
+      setComments(
+        snap.docs.map(
+          (d: import('firebase/firestore').QueryDocumentSnapshot) =>
+            ({ id: d.id, ...d.data() } as Comment)
+        )
+      );
+    });
   }, [id]);
 
   const avgRating = ratings.length
@@ -115,9 +105,19 @@ export default function RecipeDetailPage() {
       <div className={styles.ingredientsSection}>
         <h3 className={styles.ingredientsLabel}>Ingredients</h3>
         <ul className={styles.ingredientsList}>
-          {recipe.ingredients.map((ing: string, i: number) => (
+          {recipe.ingredients.map((ing: any, i: number) => (
             <li key={i} className={styles.ingredient}>
-              {ing}
+              {typeof ing === 'object' &&
+              ing !== null &&
+              'name' in ing &&
+              'quantity' in ing &&
+              'unit' in ing
+                ? `${ing.quantity} ${
+                    ing.unit === 'custom' && ing.customUnit
+                      ? ing.customUnit
+                      : ing.unit
+                  } ${ing.name}`.trim()
+                : ing}
             </li>
           ))}
         </ul>
