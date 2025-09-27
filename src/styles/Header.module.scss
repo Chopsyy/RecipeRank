@@ -4,17 +4,16 @@
   width: 100vw;
   background: #181818;
   color: #fff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   padding: 1.5rem 0 1rem 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  position: relative;
 }
 
 .nav {
   display: flex;
   gap: 2rem;
-  margin-bottom: 1rem;
+  justify-content: center;
+  width: 100%;
 }
 
 .nav a {
@@ -36,4 +35,10 @@
   font-size: 2rem;
   font-weight: 700;
   letter-spacing: 2px;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: 1.2rem;
+  left: 2rem;
+  z-index: 10;
 }

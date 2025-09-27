@@ -6,6 +6,15 @@ import { supabase } from '../../lib/supabase';
 import styles from '../../styles/AddRecipe.module.scss';
 
 export default function AddRecipePage() {
+  // Paste clipboard content into imageUrlInput
+  const handlePasteImageUrl = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      setImageUrlInput(text);
+    } catch (err) {
+      alert('Failed to read clipboard');
+    }
+  };
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [ingredients, setIngredients] = useState('');
@@ -83,7 +92,10 @@ export default function AddRecipePage() {
           </select>
         </div>
         {imageType === 'url' ? (
-          <div className={styles.field}>
+          <div
+            className={styles.field}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
             <label htmlFor="imageUrl">Image URL</label>
             <input
               id="imageUrl"
@@ -91,8 +103,20 @@ export default function AddRecipePage() {
               value={typeof imageUrlInput === 'string' ? imageUrlInput : ''}
               onChange={(e) => setImageUrlInput(e.target.value)}
               placeholder="https://..."
-              required
+              style={{ flex: 1 }}
             />
+            <button
+              type="button"
+              onClick={handlePasteImageUrl}
+              style={{
+                padding: '0.25rem 0.5rem',
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+              }}
+              aria-label="Paste from clipboard"
+            >
+              Paste
+            </button>
           </div>
         ) : (
           <div className={styles.field}>
@@ -103,7 +127,6 @@ export default function AddRecipePage() {
               accept="image/*"
               onChange={(e) => setImage(e.target.files?.[0] || null)}
               // value prop not set for file input (uncontrolled by React)
-              required
             />
           </div>
         )}
@@ -114,7 +137,6 @@ export default function AddRecipePage() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Description"
-            required
           />
         </div>
         <div className={styles.field + ' ' + styles.full}>

@@ -8,6 +8,7 @@ export const Header: React.FC = () => {
   const pathname = usePathname();
   return (
     <header className={styles.header}>
+      <h1 className={styles.title}>RecipeRank</h1>
       <nav className={styles.nav}>
         <Link href="/" className={pathname === '/' ? styles.active : ''}>
           Home
@@ -16,7 +17,6 @@ export const Header: React.FC = () => {
           Add Recipe
         </Link>
       </nav>
-      <h1 className={styles.title}>RecipeRank</h1>
     </header>
   );
 };

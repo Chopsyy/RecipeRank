@@ -7,34 +7,62 @@ interface Props {
   recipe: Recipe;
   avgRating: number;
   commentCount: number;
+  onDelete?: (id: string) => void;
 }
 
 export const RecipeCard: React.FC<Props> = ({
   recipe,
   avgRating,
   commentCount,
+  onDelete,
 }) => (
-  <Link href={`/recipe/${recipe.id}`} className={styles.card}>
-    {recipe.imageUrl && (
-      <img src={recipe.imageUrl} alt={recipe.title} className={styles.image} />
+  <div className={styles.card} style={{ position: 'relative' }}>
+    {onDelete && (
+      <button
+        className={styles.trashButton}
+        onClick={() => onDelete(recipe.id)}
+        aria-label="Delete recipe"
+      >
+        <svg
+          viewBox="0 0 32 64"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className={styles.trashIcon}
+        >
+          <rect x="8" y="8" width="16" height="6" rx="3" fill="#e74c3c" />
+          <rect x="6" y="14" width="20" height="40" rx="5" fill="#e74c3c" />
+          <rect x="11" y="20" width="2" height="28" rx="1" fill="white" />
+          <rect x="15" y="20" width="2" height="28" rx="1" fill="white" />
+          <rect x="19" y="20" width="2" height="28" rx="1" fill="white" />
+        </svg>
+      </button>
     )}
-    <div className={styles.headerSection}>
-      <h2 className={styles.title}>{recipe.title}</h2>
-    </div>
-    <div className={styles.ingredientsSection}>
-      <h4 className={styles.ingredientsLabel}>Ingredients</h4>
-      <ul className={styles.ingredientsList}>
-        {recipe.ingredients.map((ing, i) => (
-          <li key={i} className={styles.ingredient}>
-            {ing}
-          </li>
-        ))}
-      </ul>
-    </div>
-    <p className={styles.description}>{recipe.description}</p>
-    <div className={styles.meta}>
-      <span>⭐ {avgRating.toFixed(1)}</span>
-      <span>💬 {commentCount}</span>
-    </div>
-  </Link>
+    <Link href={`/recipe/${recipe.id}`} className={styles.cardLink}>
+      {recipe.imageUrl && (
+        <img
+          src={recipe.imageUrl}
+          alt={recipe.title}
+          className={styles.image}
+        />
+      )}
+      <div className={styles.headerSection}>
+        <h2 className={styles.title}>{recipe.title}</h2>
+      </div>
+      <div className={styles.ingredientsSection}>
+        <h4 className={styles.ingredientsLabel}>Ingredients</h4>
+        <ul className={styles.ingredientsList}>
+          {recipe.ingredients.map((ing, i) => (
+            <li key={i} className={styles.ingredient}>
+              {ing}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <p className={styles.description}>{recipe.description}</p>
+      <div className={styles.meta}>
+        <span>⭐ {avgRating.toFixed(1)}</span>
+        <span>💬 {commentCount}</span>
+      </div>
+    </Link>
+  </div>
 );

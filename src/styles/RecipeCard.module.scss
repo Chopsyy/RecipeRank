@@ -12,6 +12,29 @@
   text-decoration: none;
   border: 2px solid #444;
   gap: 1.5rem;
+  position: relative;
+}
+.trashButton {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 2;
+  transition: transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.trashIcon {
+  width: 32px;
+  height: 64px;
+  display: block;
+}
+.trashButton:hover svg rect {
+  fill: #c0392b;
 }
 .headerSection {
   border-bottom: 1px solid #444;
