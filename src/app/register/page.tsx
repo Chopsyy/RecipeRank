@@ -8,6 +8,7 @@ import React, { useState } from 'react';
 const RegisterPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -20,6 +21,13 @@ const RegisterPage: React.FC = () => {
         email,
         password
       );
+      // Save username to Firestore
+      const { setDoc, doc } = await import('firebase/firestore');
+      const { db } = await import('@/lib/firebase');
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+        username: username || email,
+        email,
+      });
       const token = await userCredential.user.getIdToken();
       setCookie('firebase_token', token, { maxAge: 60 * 60 * 24 * 7 }); // 7 days
       router.push('/'); // Redirect to home after registration
@@ -32,6 +40,14 @@ const RegisterPage: React.FC = () => {
     <div style={{ maxWidth: 400, margin: '2rem auto' }}>
       <h2>Register</h2>
       <form onSubmit={handleRegister}>
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+          style={{ width: '100%', marginBottom: 8 }}
+        />
         <input
           type="email"
           placeholder="Email"

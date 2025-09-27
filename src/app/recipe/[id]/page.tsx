@@ -1,6 +1,7 @@
 'use client';
 import { CommentList } from '@/components/CommentList';
 import { RatingStars } from '@/components/RatingStars';
+import { useAuthUser } from '@/hooks/useAuthUser';
 import { db } from '@/lib/firebase';
 import styles from '@/styles/RecipeDetail.module.scss';
 import { Comment } from '@/types/Comment';
@@ -21,6 +22,7 @@ export default function RecipeDetailPage() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [score, setScore] = useState(1);
   const [user, setUser] = useState('me');
+  const authUser = useAuthUser();
   const [commentText, setCommentText] = useState('');
   const [commentUser, setCommentUser] = useState('');
 
@@ -58,6 +60,18 @@ export default function RecipeDetailPage() {
               ({ id: d.id, ...d.data() } as Comment)
           )
         );
+        // Fetch username for logged-in user
+        if (authUser && authUser.uid) {
+          const { getDoc, doc } = await import('firebase/firestore');
+          const { db } = await import('@/lib/firebase');
+          const userDoc = await getDoc(doc(db, 'users', authUser.uid));
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            setCommentUser(data.username || data.email || '');
+          } else if (authUser.email) {
+            setCommentUser(authUser.email);
+          }
+        }
       } catch {
         setError('Error loading recipe.');
         setRecipe(null);
@@ -66,7 +80,7 @@ export default function RecipeDetailPage() {
       }
     };
     fetchAll();
-  }, [id]);
+  }, [id, authUser]);
 
   const avgRating = ratings.length
     ? ratings.reduce((a, b) => a + b.score, 0) / ratings.length
