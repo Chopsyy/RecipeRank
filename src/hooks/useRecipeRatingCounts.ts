@@ -1,4 +1,4 @@
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { db } from '../lib/firebase';
 
@@ -10,20 +10,16 @@ export function useRecipeRatingCounts(recipeIds: string[]) {
 
   useEffect(() => {
     if (recipeIds.length === 0) return;
-    const unsubscribers: (() => void)[] = [];
-    const newCounts: Record<string, number> = {};
-    recipeIds.forEach((id) => {
-      const ref = collection(db, 'recipes', id, 'ratings');
-      const unsub = onSnapshot(ref, (snap) => {
+    const fetchCounts = async () => {
+      const newCounts: Record<string, number> = {};
+      for (const id of recipeIds) {
+        const ref = collection(db, 'recipes', id, 'ratings');
+        const snap = await getDocs(ref);
         newCounts[id] = snap.docs.length;
-        ratingCountsCache = { ...ratingCountsCache, ...newCounts };
-        setCounts({ ...ratingCountsCache });
-      });
-      unsubscribers.push(unsub);
-    });
-    return () => {
-      unsubscribers.forEach((unsub) => unsub());
+      }
+      setCounts(newCounts);
     };
+    fetchCounts();
   }, [recipeIds]);
 
   return counts;

@@ -1,4 +1,5 @@
 'use client';
+import { useMemo, useState } from 'react';
 import { RecipeCard } from '../components/RecipeCard';
 import { useRecipeRatingCounts } from '../hooks/useRecipeRatingCounts';
 import { useRecipeRatings } from '../hooks/useRecipeRatings';
@@ -7,28 +8,53 @@ import { useRecipes } from '../hooks/useRecipes';
 import styles from '../styles/HomePage.module.scss';
 
 export default function HomePage() {
-  const recipes = useRecipes();
-  const ratings = useRecipeRatings(recipes.map((r) => r.id));
-  const ratingCounts = useRecipeRatingCounts(recipes.map((r) => r.id));
+  const [refreshKey, setRefreshKey] = useState(0);
+  const recipes = useRecipes(refreshKey);
+  const recipeIds = useMemo(() => recipes.map((r) => r.id), [recipes]);
+  const ratings = useRecipeRatings(recipeIds);
+  const ratingCounts = useRecipeRatingCounts(recipeIds);
   const handleDelete = async (id: string) => {
     const { doc, deleteDoc } = await import('firebase/firestore');
     const { db } = await import('../lib/firebase');
     await deleteDoc(doc(db, 'recipes', id));
-    // Invalidate recipes cache after deletion
-    if (typeof window !== 'undefined') {
-      // @ts-expect-error: recipesCache is a custom property added to window for caching recipes
-      if (window.recipesCache !== undefined) window.recipesCache = null;
-    }
-    try {
-      // Also try to invalidate imported cache
-      const useRecipesModule = await import('../hooks/useRecipes');
-      if (useRecipesModule && 'recipesCache' in useRecipesModule) {
-        useRecipesModule.recipesCache = null;
-      }
-    } catch {}
+    setRefreshKey((k) => k + 1);
+  };
+  const handleLogout = () => {
+    // Remove session cookie
+    document.cookie = 'session=; Max-Age=0; path=/;';
+    window.location.reload();
   };
   return (
     <div className={styles.container}>
+      <button
+        onClick={handleLogout}
+        style={{
+          position: 'absolute',
+          top: 20,
+          right: 20,
+          zIndex: 10,
+          background: 'linear-gradient(90deg, #e74c3c 0%, #f39c12 100%)',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '24px',
+          padding: '10px 28px',
+          fontWeight: 'bold',
+          fontSize: '1rem',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+          cursor: 'pointer',
+          transition: 'background 0.2s',
+        }}
+        onMouseOver={(e) =>
+          (e.currentTarget.style.background =
+            'linear-gradient(90deg, #f39c12 0%, #e74c3c 100%)')
+        }
+        onMouseOut={(e) =>
+          (e.currentTarget.style.background =
+            'linear-gradient(90deg, #e74c3c 0%, #f39c12 100%)')
+        }
+      >
+        Logout
+      </button>
       {recipes.map((recipe) => (
         <RecipeCard
           key={recipe.id}

@@ -6,13 +6,7 @@ import styles from '@/styles/RecipeDetail.module.scss';
 import { Comment } from '@/types/Comment';
 import { Rating } from '@/types/Rating';
 import { Recipe } from '@/types/Recipe';
-import {
-  addDoc,
-  collection,
-  doc,
-  onSnapshot,
-  Timestamp,
-} from 'firebase/firestore';
+import { addDoc, collection, doc, Timestamp } from 'firebase/firestore';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -34,56 +28,44 @@ export default function RecipeDetailPage() {
     if (!id) return;
     setLoading(true);
     setError(null);
-    // Listen for recipe changes
-    const unsubRecipe = onSnapshot(
-      doc(db, 'recipes', id),
-      (docSnap: import('firebase/firestore').DocumentSnapshot) => {
-        if (docSnap.exists()) {
-          setRecipe({ id: docSnap.id, ...docSnap.data() } as Recipe);
+    const fetchAll = async () => {
+      try {
+        const recipeSnap = await import('firebase/firestore').then(
+          ({ getDoc }) => getDoc(doc(db, 'recipes', id))
+        );
+        if (recipeSnap.exists()) {
+          setRecipe({ id: recipeSnap.id, ...recipeSnap.data() } as Recipe);
           setError(null);
         } else {
           setError('Recipe not found.');
           setRecipe(null);
         }
-        setLoading(false);
-      },
-      () => {
-        setError('Error loading recipe.');
-        setRecipe(null);
-        setLoading(false);
-      }
-    );
-    // Listen for ratings changes
-    const ratingsRef = collection(db, 'recipes', id, 'ratings');
-    const unsubRatings = onSnapshot(
-      ratingsRef,
-      (snap: import('firebase/firestore').QuerySnapshot) => {
+        const ratingsSnap = await import('firebase/firestore').then(
+          ({ getDocs }) => getDocs(collection(db, 'recipes', id, 'ratings'))
+        );
         setRatings(
-          snap.docs.map(
+          ratingsSnap.docs.map(
             (d: import('firebase/firestore').QueryDocumentSnapshot) =>
               ({ id: d.id, ...d.data() } as Rating)
           )
         );
-      }
-    );
-    // Listen for comments changes
-    const commentsRef = collection(db, 'recipes', id, 'comments');
-    const unsubComments = onSnapshot(
-      commentsRef,
-      (snap: import('firebase/firestore').QuerySnapshot) => {
+        const commentsSnap = await import('firebase/firestore').then(
+          ({ getDocs }) => getDocs(collection(db, 'recipes', id, 'comments'))
+        );
         setComments(
-          snap.docs.map(
+          commentsSnap.docs.map(
             (d: import('firebase/firestore').QueryDocumentSnapshot) =>
               ({ id: d.id, ...d.data() } as Comment)
           )
         );
+      } catch {
+        setError('Error loading recipe.');
+        setRecipe(null);
+      } finally {
+        setLoading(false);
       }
-    );
-    return () => {
-      unsubRecipe();
-      unsubRatings();
-      unsubComments();
     };
+    fetchAll();
   }, [id]);
 
   const avgRating = ratings.length
