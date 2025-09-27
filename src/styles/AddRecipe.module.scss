@@ -1,0 +1,68 @@
+// AddRecipe.module.scss
+
+.container {
+  max-width: 700px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #232323;
+  color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 2px solid #444;
+}
+.title {
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: stretch;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.form label {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+  color: #90cdf4;
+}
+.form input,
+.form textarea {
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #444;
+  background: #232326;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.button,
+.form button {
+  background: #0070f3;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+  margin-top: 1.5rem;
+}
+
+.button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}

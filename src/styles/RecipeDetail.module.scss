@@ -1,0 +1,126 @@
+// RecipeDetail.module.scss
+
+.detail {
+  padding: 2rem;
+  background: #232323;
+  color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  max-width: 700px;
+  margin: 2rem auto;
+  border: 2px solid #444;
+  gap: 1.5rem;
+}
+.headerSection {
+  border-bottom: 1px solid #444;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+.title {
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+}
+.ingredientsSection {
+  background: #18181b;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #333;
+}
+.ingredientsLabel {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #90cdf4;
+}
+.ingredientsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+.ingredient {
+  background: #232326;
+  border-radius: 4px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.95rem;
+  color: #e0e0e0;
+}
+.description {
+  margin: 0.5rem 0 2rem 0;
+  font-size: 1rem;
+  color: #ccc;
+}
+
+@media (prefers-color-scheme: dark) {
+  .detail {
+    background: #18181b;
+    color: #f3f3f3;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  .image {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  }
+  .formInput {
+    background: #232326;
+    color: #f3f3f3;
+    border: 1px solid #444;
+  }
+  .formButton {
+    background: #2563eb;
+    color: #f3f3f3;
+  }
+  .formButton:disabled {
+    background: #444;
+    color: #aaa;
+  }
+}
+
+.section {
+  margin-bottom: 2rem;
+}
+
+.image {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.ratings {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.comments {
+  margin-top: 2rem;
+}
+
+.formInput {
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.formButton {
+  background: #0070f3;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.formButton:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}

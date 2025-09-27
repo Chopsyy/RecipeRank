@@ -1,0 +1,39 @@
+@use './variables.scss' as *;
+
+.header {
+  width: 100vw;
+  background: #181818;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 0 1rem 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.nav {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1rem;
+}
+
+.nav a {
+  color: #fff;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: $border-radius;
+  transition: background 0.2s;
+}
+
+.nav a:hover,
+.nav .active {
+  background: $primary-color;
+  color: #fff;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+}

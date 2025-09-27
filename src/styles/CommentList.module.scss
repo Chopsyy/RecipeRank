@@ -1,0 +1,11 @@
+@use './variables.scss' as *;
+.list {
+  margin-top: 1rem;
+}
+.comment {
+  background: #2a2a2a;
+  border-radius: $border-radius;
+  padding: 0.5rem 1rem;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}

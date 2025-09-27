@@ -1,0 +1,69 @@
+@use './variables.scss' as *;
+.card {
+  background: #232323;
+  color: #fff;
+  border-radius: $border-radius;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  text-decoration: none;
+  border: 2px solid #444;
+  gap: 1.5rem;
+}
+.headerSection {
+  border-bottom: 1px solid #444;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+.title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.ingredientsSection {
+  background: #18181b;
+  border-radius: $border-radius;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #333;
+}
+.ingredientsLabel {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #90cdf4;
+}
+.ingredientsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+.ingredient {
+  background: #232326;
+  border-radius: 4px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.95rem;
+  color: #e0e0e0;
+}
+.description {
+  margin: 0.5rem 0 0 0;
+  font-size: 1rem;
+  color: #ccc;
+}
+.image {
+  width: 100%;
+  max-width: 320px;
+  border-radius: $border-radius;
+  margin-bottom: 1rem;
+}
+.meta {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
