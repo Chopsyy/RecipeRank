@@ -9,14 +9,26 @@ export default function AddRecipePage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [ingredients, setIngredients] = useState('');
+  const [imageType, setImageType] = useState<'url' | 'file'>('url');
+  const [imageUrlInput, setImageUrlInput] = useState('');
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Ensure controlled input when switching type
+  const handleImageTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newType = e.target.value as 'url' | 'file';
+    setImageType(newType);
+    if (newType === 'url') {
+      setImage(null); // Clear file input
+    } else {
+      setImageUrlInput(''); // Clear URL input
+    }
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     let imageUrl = '';
-    if (image) {
+    if (imageType === 'file' && image) {
       const { data } = await supabase.storage
         .from('recipe-images')
         .upload(`recipes/${Date.now()}_${image.name}`, image);
@@ -26,6 +38,8 @@ export default function AddRecipePage() {
           .getPublicUrl(data.path);
         imageUrl = publicUrlData.publicUrl;
       }
+    } else if (imageType === 'url') {
+      imageUrl = imageUrlInput;
     }
     await addDoc(collection(db, 'recipes'), {
       title,
@@ -38,6 +52,8 @@ export default function AddRecipePage() {
     setDescription('');
     setIngredients('');
     setImage(null);
+    setImageUrlInput('');
+    setImageType('url');
     setLoading(false);
   };
 
@@ -56,14 +72,41 @@ export default function AddRecipePage() {
           />
         </div>
         <div className={styles.field}>
-          <label htmlFor="image">Image</label>
-          <input
-            id="image"
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImage(e.target.files?.[0] || null)}
-          />
+          <label htmlFor="imageType">Image Type</label>
+          <select
+            id="imageType"
+            value={imageType}
+            onChange={handleImageTypeChange}
+          >
+            <option value="url">Image URL</option>
+            <option value="file">Upload File</option>
+          </select>
         </div>
+        {imageType === 'url' ? (
+          <div className={styles.field}>
+            <label htmlFor="imageUrl">Image URL</label>
+            <input
+              id="imageUrl"
+              type="url"
+              value={typeof imageUrlInput === 'string' ? imageUrlInput : ''}
+              onChange={(e) => setImageUrlInput(e.target.value)}
+              placeholder="https://..."
+              required
+            />
+          </div>
+        ) : (
+          <div className={styles.field}>
+            <label htmlFor="image">Image File</label>
+            <input
+              id="image"
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImage(e.target.files?.[0] || null)}
+              // value prop not set for file input (uncontrolled by React)
+              required
+            />
+          </div>
+        )}
         <div className={styles.field + ' ' + styles.full}>
           <label htmlFor="description">Description</label>
           <textarea
