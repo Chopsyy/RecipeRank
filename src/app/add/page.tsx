@@ -1,11 +1,15 @@
 'use client';
+import { useAuthUser } from '@/hooks/useAuthUser';
 import { addDoc, collection, Timestamp } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { db } from '../../lib/firebase';
 import { supabase } from '../../lib/supabase';
 import styles from '../../styles/AddRecipe.module.scss';
 
 export default function AddRecipePage() {
+  const user = useAuthUser();
+  const router = useRouter();
   const commonUnits = [
     'g',
     'kg',
@@ -63,6 +67,10 @@ export default function AddRecipePage() {
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      alert('You must be logged in to add a recipe.');
+      return;
+    }
     setLoading(true);
     let imageUrl = '';
     if (imageType === 'file' && image) {
@@ -84,6 +92,7 @@ export default function AddRecipePage() {
       ingredients,
       imageUrl,
       createdAt: Timestamp.now().toDate().toISOString(),
+      userId: user.uid,
     });
     setTitle('');
     setDescription('');
@@ -94,6 +103,17 @@ export default function AddRecipePage() {
     setLoading(false);
   };
 
+  if (!user) {
+    return (
+      <div className={styles.container}>
+        <h1 className={styles.title}>Add Recipe</h1>
+        <p>You must be logged in to add a recipe.</p>
+        <a href="/login" style={{ color: '#3498db' }}>
+          Go to Login
+        </a>
+      </div>
+    );
+  }
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Add Recipe</h1>
@@ -154,7 +174,6 @@ export default function AddRecipePage() {
               type="file"
               accept="image/*"
               onChange={(e) => setImage(e.target.files?.[0] || null)}
-              // value prop not set for file input (uncontrolled by React)
             />
           </div>
         )}
