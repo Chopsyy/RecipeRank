@@ -20,8 +20,9 @@ export default function HomePage() {
     setRefreshKey((k) => k + 1);
   };
   const handleLogout = () => {
-    // Remove session cookie
-    document.cookie = 'session=; Max-Age=0; path=/;';
+    // Remove the Firebase Auth token cookie
+    document.cookie =
+      'firebase_token=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
     window.location.reload();
   };
   return (
