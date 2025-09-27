@@ -6,11 +6,25 @@ import { useRecipeRatingCounts } from '../hooks/useRecipeRatingCounts';
 import { useRecipeRatings } from '../hooks/useRecipeRatings';
 import { useRecipes } from '../hooks/useRecipes';
 
+import { exampleRecipes } from '../data/exampleRecipes';
 import styles from '../styles/HomePage.module.scss';
 
 export default function HomePage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const recipes = useRecipes(refreshKey);
+  // Add example recipes (no id, so use index as key)
+  const allRecipes = [
+    ...recipes,
+    ...exampleRecipes.map((r, i) => ({
+      ...r,
+      id: `example-${i}`,
+      createdAt: new Date().toISOString(),
+      ingredients: r.ingredients.map((ing) => ({
+        ...ing,
+        quantity: ing.quantity.toString(),
+      })),
+    })),
+  ];
   const recipeIds = useMemo(() => recipes.map((r) => r.id), [recipes]);
   const ratings = useRecipeRatings(recipeIds);
   const ratingCounts = useRecipeRatingCounts(recipeIds);
@@ -58,14 +72,14 @@ export default function HomePage() {
       >
         Logout
       </button>
-      {recipes.map((recipe) => (
+      {allRecipes.map((recipe) => (
         <RecipeCard
           key={recipe.id}
           recipe={recipe}
           avgRating={ratings[recipe.id] ?? 0}
           ratingCount={ratingCounts[recipe.id] ?? 0}
           commentCount={commentCounts[recipe.id] ?? 0}
-          onDelete={handleDelete}
+          onDelete={recipe.id.startsWith('example-') ? undefined : handleDelete}
         />
       ))}
     </div>

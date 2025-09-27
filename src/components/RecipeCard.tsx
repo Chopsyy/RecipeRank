@@ -36,6 +36,7 @@ export const RecipeCard: React.FC<Props> = ({
       'unit' in ing
     );
   };
+  const isExample = recipe.id.startsWith('example-');
   return (
     <a
       href={`/recipe/${recipe.id}`}
@@ -73,10 +74,12 @@ export const RecipeCard: React.FC<Props> = ({
           width={400}
           height={300}
           priority
+          style={{ objectFit: 'cover' }}
         />
       )}
       <div className={styles.headerSection}>
         <h2 className={styles.title}>{recipe.title}</h2>
+        {isExample && <span className={styles.exampleBadge}>Example</span>}
       </div>
       <div className={styles.ingredientsSection}>
         <h4 className={styles.ingredientsLabel}>Ingredients</h4>

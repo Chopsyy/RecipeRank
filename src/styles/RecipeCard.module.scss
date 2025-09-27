@@ -1,4 +1,17 @@
 @use './variables.scss' as *;
+// Example badge styling
+.exampleBadge {
+  display: inline-block;
+  margin-left: 0.75rem;
+  padding: 0.2em 0.7em;
+  background: linear-gradient(90deg, #f39c12 0%, #e74c3c 100%);
+  color: #fff;
+  font-size: 0.85em;
+  font-weight: bold;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  vertical-align: middle;
+}
 .card {
   background: #232323;
   color: #fff;
