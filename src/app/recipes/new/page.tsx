@@ -2,7 +2,7 @@
 import { useAuthUser } from "@/hooks/useAuthUser";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
-import styles from "../../styles/AddRecipe.module.scss";
+import styles from "@/styles/AddRecipe.module.scss";
 
 export default function AddRecipePage() {
   const user = useAuthUser();

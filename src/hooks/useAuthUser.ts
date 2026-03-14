@@ -6,7 +6,7 @@ export type AppUser = "me" | "gf" | null;
 export function useAuthUser() {
   const [user, setUser] = useState<AppUser>(null);
   useEffect(() => {
-    fetch("/api/auth/me")
+    fetch("/api/auth/session")
       .then((res) => res.json())
       .then((data) => setUser(data.user))
       .catch(() => setUser(null));

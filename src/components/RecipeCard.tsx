@@ -1,7 +1,7 @@
-import Image from 'next/image';
-import React from 'react';
-import styles from '../styles/RecipeCard.module.scss';
-import { Recipe } from '../types/Recipe';
+import Image from "next/image";
+import React from "react";
+import styles from "../styles/RecipeCard.module.scss";
+import { Recipe } from "../types/Recipe";
 interface Props {
   recipe: Recipe;
   avgRating: number;
@@ -26,22 +26,22 @@ export const RecipeCard: React.FC<Props> = ({
   };
 
   const isIngredientObj = (
-    ing: IngredientObj | string
+    ing: IngredientObj | string,
   ): ing is IngredientObj => {
     return (
-      typeof ing === 'object' &&
+      typeof ing === "object" &&
       ing !== null &&
-      'name' in ing &&
-      'quantity' in ing &&
-      'unit' in ing
+      "name" in ing &&
+      "quantity" in ing &&
+      "unit" in ing
     );
   };
-  const isExample = recipe.id.startsWith('example-');
+  const isExample = recipe.id.startsWith("example-");
   return (
     <a
-      href={`/recipe/${recipe.id}`}
+      href={`/recipes/${recipe.id}`}
       className={styles.card}
-      style={{ position: 'relative', textDecoration: 'none', color: 'inherit' }}
+      style={{ position: "relative", textDecoration: "none", color: "inherit" }}
     >
       {onDelete && (
         <button
@@ -74,7 +74,7 @@ export const RecipeCard: React.FC<Props> = ({
           width={400}
           height={300}
           priority
-          style={{ objectFit: 'cover' }}
+          style={{ objectFit: "cover" }}
         />
       )}
       <div className={styles.headerSection}>
@@ -88,7 +88,7 @@ export const RecipeCard: React.FC<Props> = ({
             <li key={i} className={styles.ingredient}>
               {isIngredientObj(ing)
                 ? `${ing.quantity} ${
-                    ing.unit === 'custom' && ing.customUnit
+                    ing.unit === "custom" && ing.customUnit
                       ? ing.customUnit
                       : ing.unit
                   } ${ing.name}`.trim()
@@ -101,7 +101,7 @@ export const RecipeCard: React.FC<Props> = ({
       <div className={styles.meta}>
         <span>
           ⭐ {avgRating.toFixed(1)}
-          {ratingCount > 0 ? ` (${ratingCount})` : ''}
+          {ratingCount > 0 ? ` (${ratingCount})` : ""}
         </span>
         <span>💬 {commentCount}</span>
       </div>
