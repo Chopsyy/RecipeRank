@@ -1,16 +1,14 @@
-'use client';
-import { CommentList } from '@/components/CommentList';
-import { RatingStars } from '@/components/RatingStars';
-import { useAuthUser } from '@/hooks/useAuthUser';
-import { db } from '@/lib/firebase';
-import styles from '@/styles/RecipeDetail.module.scss';
-import { Comment } from '@/types/Comment';
-import { Rating } from '@/types/Rating';
-import { Recipe } from '@/types/Recipe';
-import { addDoc, collection, doc, Timestamp } from 'firebase/firestore';
-import Image from 'next/image';
-import { useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+"use client";
+import { CommentList } from "@/components/CommentList";
+import { RatingStars } from "@/components/RatingStars";
+import { useAuthUser } from "@/hooks/useAuthUser";
+import styles from "@/styles/RecipeDetail.module.scss";
+import { Comment } from "@/types/Comment";
+import { Rating } from "@/types/Rating";
+import { Recipe } from "@/types/Recipe";
+import Image from "next/image";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function RecipeDetailPage() {
   const params = useParams();
@@ -18,69 +16,36 @@ export default function RecipeDetailPage() {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [ratings, setRatings] = useState<Rating[]>([]);
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [score, setScore] = useState(1);
-  const [user, setUser] = useState('me');
+  const [score, setScore] = useState(5);
+  const [ratingUser, setRatingUser] = useState<"me" | "gf">("me");
   const authUser = useAuthUser();
-  const [commentText, setCommentText] = useState('');
-  const [commentUser, setCommentUser] = useState('');
+  const [commentText, setCommentText] = useState("");
+
+  const fetchRecipe = async () => {
+    if (!id) return;
+    try {
+      const res = await fetch(`/api/recipes/${id}`);
+      if (!res.ok) {
+        setError("Recipe not found.");
+        setRecipe(null);
+      } else {
+        setRecipe(await res.json());
+        setError(null);
+      }
+    } catch {
+      setError("Error loading recipe.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (!id) return;
-    setLoading(true);
-    setError(null);
-    const fetchAll = async () => {
-      try {
-        const recipeSnap = await import('firebase/firestore').then(
-          ({ getDoc }) => getDoc(doc(db, 'recipes', id))
-        );
-        if (recipeSnap.exists()) {
-          setRecipe({ id: recipeSnap.id, ...recipeSnap.data() } as Recipe);
-          setError(null);
-        } else {
-          setError('Recipe not found.');
-          setRecipe(null);
-        }
-        const ratingsSnap = await import('firebase/firestore').then(
-          ({ getDocs }) => getDocs(collection(db, 'recipes', id, 'ratings'))
-        );
-        setRatings(
-          ratingsSnap.docs.map(
-            (d: import('firebase/firestore').QueryDocumentSnapshot) =>
-              ({ id: d.id, ...d.data() } as Rating)
-          )
-        );
-        const commentsSnap = await import('firebase/firestore').then(
-          ({ getDocs }) => getDocs(collection(db, 'recipes', id, 'comments'))
-        );
-        setComments(
-          commentsSnap.docs.map(
-            (d: import('firebase/firestore').QueryDocumentSnapshot) =>
-              ({ id: d.id, ...d.data() } as Comment)
-          )
-        );
-        // Fetch username for logged-in user
-        if (authUser && authUser.uid) {
-          const { getDoc, doc } = await import('firebase/firestore');
-          const { db } = await import('@/lib/firebase');
-          const userDoc = await getDoc(doc(db, 'users', authUser.uid));
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            setCommentUser(data.username || data.email || '');
-          } else if (authUser.email) {
-            setCommentUser(authUser.email);
-          }
-        }
-      } catch {
-        setError('Error loading recipe.');
-        setRecipe(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAll();
-  }, [id, authUser]);
+    fetchRecipe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  const ratings: Rating[] = recipe?.ratings ?? [];
+  const comments: Comment[] = recipe?.comments ?? [];
 
   const avgRating = ratings.length
     ? ratings.reduce((a, b) => a + b.score, 0) / ratings.length
@@ -88,26 +53,27 @@ export default function RecipeDetailPage() {
 
   const handleAddRating = async () => {
     if (!id) return;
-    await addDoc(collection(db, 'recipes', id, 'ratings'), {
-      score,
-      user,
-      createdAt: Timestamp.now().toDate().toISOString(),
+    await fetch(`/api/recipes/${id}/ratings`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ score, user: ratingUser }),
     });
+    fetchRecipe();
   };
 
   const handleAddComment = async () => {
-    if (!id || !commentText || !commentUser) return;
-    await addDoc(collection(db, 'recipes', id, 'comments'), {
-      comment: commentText,
-      user: commentUser,
-      createdAt: Timestamp.now().toDate().toISOString(),
+    if (!id || !commentText.trim()) return;
+    await fetch(`/api/recipes/${id}/comments`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ comment: commentText }),
     });
-    setCommentText('');
-    setCommentUser('');
+    setCommentText("");
+    fetchRecipe();
   };
 
   if (loading) return <div>Loading...</div>;
-  if (error) return <div style={{ color: 'red' }}>{error}</div>;
+  if (error) return <div style={{ color: "red" }}>{error}</div>;
   if (!recipe) return null;
 
   return (
@@ -130,21 +96,21 @@ export default function RecipeDetailPage() {
         <h3 className={styles.ingredientsLabel}>Ingredients</h3>
         <ul className={styles.ingredientsList}>
           {recipe.ingredients.map(
-            (ing: import('@/types/Recipe').Ingredient, i: number) => (
+            (ing: import("@/types/Recipe").Ingredient, i: number) => (
               <li key={i} className={styles.ingredient}>
-                {typeof ing === 'object' &&
+                {typeof ing === "object" &&
                 ing !== null &&
-                'name' in ing &&
-                'quantity' in ing &&
-                'unit' in ing
+                "name" in ing &&
+                "quantity" in ing &&
+                "unit" in ing
                   ? `${ing.quantity} ${
-                      ing.unit === 'custom' && ing.customUnit
+                      ing.unit === "custom" && ing.customUnit
                         ? ing.customUnit
                         : ing.unit
                     } ${ing.name}`.trim()
                   : ing}
               </li>
-            )
+            ),
           )}
         </ul>
       </div>
@@ -157,8 +123,8 @@ export default function RecipeDetailPage() {
           </span>
           <select
             className={styles.formInput}
-            value={user}
-            onChange={(e) => setUser(e.target.value)}
+            value={ratingUser}
+            onChange={(e) => setRatingUser(e.target.value as "me" | "gf")}
           >
             <option value="me">Me</option>
             <option value="gf">Girlfriend</option>
@@ -171,21 +137,19 @@ export default function RecipeDetailPage() {
       <div className={styles.comments}>
         <h3>Comments</h3>
         <CommentList comments={comments} />
-        <input
-          className={styles.formInput}
-          value={commentUser}
-          onChange={(e) => setCommentUser(e.target.value)}
-          placeholder="Your name"
-        />
-        <input
-          className={styles.formInput}
-          value={commentText}
-          onChange={(e) => setCommentText(e.target.value)}
-          placeholder="Comment"
-        />
-        <button className={styles.formButton} onClick={handleAddComment}>
-          Add Comment
-        </button>
+        {authUser && (
+          <>
+            <input
+              className={styles.formInput}
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              placeholder="Add a comment…"
+            />
+            <button className={styles.formButton} onClick={handleAddComment}>
+              Add Comment
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

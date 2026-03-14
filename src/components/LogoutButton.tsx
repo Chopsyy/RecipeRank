@@ -1,15 +1,15 @@
-import { auth } from '@/lib/firebase';
-import { signOut } from 'firebase/auth';
-import React from 'react';
+import { useRouter } from "next/navigation";
+import React from "react";
 
 const LogoutButton: React.FC = () => {
+  const router = useRouter();
   const handleLogout = async () => {
-    await signOut(auth);
-    window.location.reload();
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
   };
 
   return (
-    <button onClick={handleLogout} style={{ margin: '1rem' }}>
+    <button onClick={handleLogout} style={{ margin: "1rem" }}>
       Logout
     </button>
   );

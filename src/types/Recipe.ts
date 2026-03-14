@@ -1,3 +1,6 @@
+import type { Comment } from "./Comment";
+import type { Rating } from "./Rating";
+
 export interface Ingredient {
   name: string;
   quantity: string;
@@ -12,4 +15,7 @@ export interface Recipe {
   ingredients: Ingredient[];
   imageUrl?: string;
   createdAt: string;
+  userId: string;
+  ratings: Rating[];
+  comments: Comment[];
 }

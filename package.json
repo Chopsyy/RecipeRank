@@ -2,6 +2,7 @@
   "name": "reciperank",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.14.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,9 +10,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.58.0",
-    "cookies-next": "^6.1.0",
-    "firebase": "^12.3.0",
+    "@vercel/blob": "^2.3.0",
     "next": "15.5.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",

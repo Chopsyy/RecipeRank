@@ -1,12 +1,15 @@
-import { auth } from '@/lib/firebase';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { useEffect, useState } from 'react';
+"use client";
+import { useEffect, useState } from "react";
+
+export type AppUser = "me" | "gf" | null;
 
 export function useAuthUser() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser>(null);
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, setUser);
-    return () => unsubscribe();
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => setUser(data.user))
+      .catch(() => setUser(null));
   }, []);
   return user;
 }

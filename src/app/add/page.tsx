@@ -1,38 +1,37 @@
-'use client';
-import { useAuthUser } from '@/hooks/useAuthUser';
-import { addDoc, collection, Timestamp } from 'firebase/firestore';
-import React, { useState } from 'react';
-import { db } from '../../lib/firebase';
-import { supabase } from '../../lib/supabase';
-import styles from '../../styles/AddRecipe.module.scss';
+"use client";
+import { useAuthUser } from "@/hooks/useAuthUser";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import styles from "../../styles/AddRecipe.module.scss";
 
 export default function AddRecipePage() {
   const user = useAuthUser();
+  const router = useRouter();
   const commonUnits = [
-    'g',
-    'kg',
-    'ml',
-    'l',
-    'TL',
-    'EL',
-    'Stück',
-    'Prise',
-    'Bund',
-    'Dose',
-    'Päckchen',
-    'Scheibe',
-    'Tasse',
-    'Becher',
-    'cm',
-    'Msp.',
-    'Schuss',
-    'Spritzer',
-    'Würfel',
-    'Kugel',
-    'Blatt',
-    'Zehe',
-    'Handvoll',
-    'custom',
+    "g",
+    "kg",
+    "ml",
+    "l",
+    "TL",
+    "EL",
+    "Stück",
+    "Prise",
+    "Bund",
+    "Dose",
+    "Päckchen",
+    "Scheibe",
+    "Tasse",
+    "Becher",
+    "cm",
+    "Msp.",
+    "Schuss",
+    "Spritzer",
+    "Würfel",
+    "Kugel",
+    "Blatt",
+    "Zehe",
+    "Handvoll",
+    "custom",
   ];
   // Paste clipboard content into imageUrlInput
   const handlePasteImageUrl = async () => {
@@ -40,11 +39,11 @@ export default function AddRecipePage() {
       const text = await navigator.clipboard.readText();
       setImageUrlInput(text);
     } catch {
-      alert('Failed to read clipboard');
+      alert("Failed to read clipboard");
     }
   };
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   type Ingredient = {
     name: string;
     quantity: string;
@@ -53,59 +52,59 @@ export default function AddRecipePage() {
   };
 
   const [ingredients, setIngredients] = useState<Ingredient[]>([
-    { name: '', quantity: '', unit: '' },
+    { name: "", quantity: "", unit: "" },
   ]);
-  const [imageType, setImageType] = useState<'url' | 'file'>('url');
-  const [imageUrlInput, setImageUrlInput] = useState('');
+  const [imageType, setImageType] = useState<"url" | "file">("url");
+  const [imageUrlInput, setImageUrlInput] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
   // Ensure controlled input when switching type
   const handleImageTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newType = e.target.value as 'url' | 'file';
+    const newType = e.target.value as "url" | "file";
     setImageType(newType);
-    if (newType === 'url') {
+    if (newType === "url") {
       setImage(null); // Clear file input
     } else {
-      setImageUrlInput(''); // Clear URL input
+      setImageUrlInput(""); // Clear URL input
     }
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-      alert('You must be logged in to add a recipe.');
+      alert("You must be logged in to add a recipe.");
       return;
     }
     setLoading(true);
-    let imageUrl = '';
-    if (imageType === 'file' && image) {
-      const { data } = await supabase.storage
-        .from('recipe-images')
-        .upload(`recipes/${Date.now()}_${image.name}`, image);
-      if (data) {
-        const { data: publicUrlData } = supabase.storage
-          .from('recipe-images')
-          .getPublicUrl(data.path);
-        imageUrl = publicUrlData.publicUrl;
+    try {
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("description", description);
+      formData.append("ingredients", JSON.stringify(ingredients));
+      if (imageType === "file" && image) {
+        formData.append("image", image);
+      } else if (imageType === "url" && imageUrlInput) {
+        formData.append("imageUrl", imageUrlInput);
       }
-    } else if (imageType === 'url') {
-      imageUrl = imageUrlInput;
+      const res = await fetch("/api/recipes", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error ?? "Failed to add recipe.");
+        return;
+      }
+      setTitle("");
+      setDescription("");
+      setIngredients([{ name: "", quantity: "", unit: "" }]);
+      setImage(null);
+      setImageUrlInput("");
+      setImageType("url");
+      router.push("/");
+    } finally {
+      setLoading(false);
     }
-    await addDoc(collection(db, 'recipes'), {
-      title,
-      description,
-      ingredients,
-      imageUrl,
-      createdAt: Timestamp.now().toDate().toISOString(),
-      userId: user.uid,
-    });
-    setTitle('');
-    setDescription('');
-    setIngredients([{ name: '', quantity: '', unit: '' }]);
-    setImage(null);
-    setImageUrlInput('');
-    setImageType('url');
-    setLoading(false);
   };
 
   if (!user) {
@@ -113,7 +112,7 @@ export default function AddRecipePage() {
       <div className={styles.container}>
         <h1 className={styles.title}>Add Recipe</h1>
         <p>You must be logged in to add a recipe.</p>
-        <a href="/login" style={{ color: '#3498db' }}>
+        <a href="/login" style={{ color: "#3498db" }}>
           Go to Login
         </a>
       </div>
@@ -144,16 +143,16 @@ export default function AddRecipePage() {
             <option value="file">Upload File</option>
           </select>
         </div>
-        {imageType === 'url' ? (
+        {imageType === "url" ? (
           <div
             className={styles.field}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
           >
             <label htmlFor="imageUrl">Image URL</label>
             <input
               id="imageUrl"
               type="url"
-              value={typeof imageUrlInput === 'string' ? imageUrlInput : ''}
+              value={typeof imageUrlInput === "string" ? imageUrlInput : ""}
               onChange={(e) => setImageUrlInput(e.target.value)}
               placeholder="https://..."
               style={{ flex: 1 }}
@@ -162,9 +161,9 @@ export default function AddRecipePage() {
               type="button"
               onClick={handlePasteImageUrl}
               style={{
-                padding: '0.25rem 0.5rem',
-                fontSize: '0.8rem',
-                cursor: 'pointer',
+                padding: "0.25rem 0.5rem",
+                fontSize: "0.8rem",
+                cursor: "pointer",
               }}
               aria-label="Paste from clipboard"
             >
@@ -182,7 +181,7 @@ export default function AddRecipePage() {
             />
           </div>
         )}
-        <div className={styles.field + ' ' + styles.full}>
+        <div className={styles.field + " " + styles.full}>
           <label htmlFor="description">Description</label>
           <textarea
             id="description"
@@ -191,12 +190,12 @@ export default function AddRecipePage() {
             placeholder="Description"
           />
         </div>
-        <div className={styles.field + ' ' + styles.full}>
+        <div className={styles.field + " " + styles.full}>
           <label>Ingredients</label>
           {ingredients.map((ing, idx) => (
             <div
               key={idx}
-              style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}
+              style={{ display: "flex", gap: "0.5rem", marginBottom: "0.5rem" }}
             >
               <input
                 type="text"
@@ -235,15 +234,15 @@ export default function AddRecipePage() {
                 <option value="">Einheit wählen</option>
                 {commonUnits.map((unit) => (
                   <option key={unit} value={unit}>
-                    {unit === 'custom' ? 'Andere...' : unit}
+                    {unit === "custom" ? "Andere..." : unit}
                   </option>
                 ))}
               </select>
-              {ing.unit === 'custom' && (
+              {ing.unit === "custom" && (
                 <input
                   type="text"
                   placeholder="Eigene Einheit"
-                  value={ing.customUnit || ''}
+                  value={ing.customUnit || ""}
                   onChange={(e) => {
                     const newIngredients = [...ingredients];
                     newIngredients[idx].customUnit = e.target.value;
@@ -258,12 +257,12 @@ export default function AddRecipePage() {
                   setIngredients(ingredients.filter((_, i) => i !== idx));
                 }}
                 style={{
-                  background: '#e74c3c',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  padding: '0 0.5rem',
-                  cursor: 'pointer',
+                  background: "#e74c3c",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  padding: "0 0.5rem",
+                  cursor: "pointer",
                 }}
                 aria-label="Remove ingredient"
                 disabled={ingredients.length === 1}
@@ -277,24 +276,24 @@ export default function AddRecipePage() {
             onClick={() =>
               setIngredients([
                 ...ingredients,
-                { name: '', quantity: '', unit: '' },
+                { name: "", quantity: "", unit: "" },
               ])
             }
             style={{
-              background: '#3498db',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              padding: '0.3rem 0.7rem',
-              cursor: 'pointer',
-              marginTop: '0.5rem',
+              background: "#3498db",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              padding: "0.3rem 0.7rem",
+              cursor: "pointer",
+              marginTop: "0.5rem",
             }}
           >
             + Add Ingredient
           </button>
         </div>
         <button type="submit" disabled={loading} className={styles.full}>
-          {loading ? 'Adding...' : 'Add Recipe'}
+          {loading ? "Adding..." : "Add Recipe"}
         </button>
       </form>
     </div>
