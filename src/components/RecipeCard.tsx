@@ -68,7 +68,11 @@ export const RecipeCard: React.FC<Props> = ({
       )}
       {recipe.imageUrl && (
         <Image
-          src={recipe.imageUrl}
+          src={
+            recipe.imageUrl.includes(".blob.vercel-storage.com")
+              ? `/api/images?url=${encodeURIComponent(recipe.imageUrl)}`
+              : recipe.imageUrl
+          }
           alt={recipe.title}
           className={styles.image}
           width={400}

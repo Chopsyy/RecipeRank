@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       `images/${Date.now()}_${imageFile.name}`,
       imageFile,
       {
-        access: "public",
+        access: "private",
       },
     );
     imageUrl = blob.url;
