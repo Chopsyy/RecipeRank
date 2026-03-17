@@ -16,6 +16,7 @@ export interface Recipe {
   imageUrl?: string;
   createdAt: string;
   userId: string;
+  tags?: string[];
   ratings: Rating[];
   comments: Comment[];
 }

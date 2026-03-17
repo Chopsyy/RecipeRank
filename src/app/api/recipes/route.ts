@@ -25,6 +25,8 @@ export async function POST(request: Request) {
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
   const ingredients = JSON.parse(formData.get("ingredients") as string);
+  const tagsRaw = formData.get("tags") as string | null;
+  const tags: string[] = tagsRaw ? JSON.parse(tagsRaw) : [];
   const imageFile = formData.get("image") as File | null;
   const imageUrlInput = formData.get("imageUrl") as string | null;
 
@@ -50,6 +52,7 @@ export async function POST(request: Request) {
     imageUrl,
     createdAt: new Date().toISOString(),
     userId: user,
+    tags,
     ratings: [] as {
       id: string;
       score: number;
@@ -66,6 +69,10 @@ export async function POST(request: Request) {
 
   const data = await readData();
   data.recipes.push(newRecipe);
+  // Merge new tags into global tag list
+  const tagSet = new Set(data.tags);
+  for (const tag of tags) tagSet.add(tag);
+  data.tags = Array.from(tagSet).sort();
   await writeData(data);
 
   return NextResponse.json(newRecipe, { status: 201 });

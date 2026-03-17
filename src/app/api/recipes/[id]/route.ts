@@ -38,6 +38,12 @@ export async function DELETE(
   }
 
   data.recipes = data.recipes.filter((r) => r.id !== id);
+  // Recompute global tag list from remaining recipes to prune orphans
+  const remainingTags = new Set<string>();
+  for (const r of data.recipes) {
+    for (const tag of r.tags ?? []) remainingTags.add(tag);
+  }
+  data.tags = Array.from(remainingTags).sort();
   await writeData(data);
 
   return new NextResponse(null, { status: 204 });

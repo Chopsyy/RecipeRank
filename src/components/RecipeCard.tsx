@@ -102,6 +102,15 @@ export const RecipeCard: React.FC<Props> = ({
         </ul>
       </div>
       <p className={styles.description}>{recipe.description}</p>
+      {recipe.tags && recipe.tags.length > 0 && (
+        <div className={styles.tagsRow}>
+          {recipe.tags.map((tag) => (
+            <span key={tag} className={styles.tag}>
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
       <div className={styles.meta}>
         <span>
           ⭐ {avgRating.toFixed(1)}

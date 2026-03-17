@@ -1,4 +1,4 @@
-@use './variables.scss' as *;
+@use "./variables.scss" as *;
 // Example badge styling
 .exampleBadge {
   display: inline-block;
@@ -101,4 +101,23 @@
   display: flex;
   gap: 1rem;
   margin-top: 0.5rem;
+}
+
+.tagsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}
+
+.tag {
+  display: inline-block;
+  padding: 0.2em 0.65em;
+  background: #2d3a4a;
+  color: #90cdf4;
+  border: 1px solid #3b5068;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
 }

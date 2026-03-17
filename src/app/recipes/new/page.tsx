@@ -1,7 +1,7 @@
 "use client";
 import { useAuthUser } from "@/hooks/useAuthUser";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "@/styles/AddRecipe.module.scss";
 
 export default function AddRecipePage() {
@@ -58,6 +58,42 @@ export default function AddRecipePage() {
   const [imageUrlInput, setImageUrlInput] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [showTagDropdown, setShowTagDropdown] = useState(false);
+  const tagInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetch("/api/tags")
+      .then((r) => r.json())
+      .then((data: string[]) => setAvailableTags(data))
+      .catch(() => {});
+  }, []);
+
+  const filteredTags = availableTags.filter(
+    (t) =>
+      t.toLowerCase().includes(tagInput.toLowerCase()) && !tags.includes(t),
+  );
+
+  const addTag = (tag: string) => {
+    const trimmed = tag.trim();
+    if (trimmed && !tags.includes(trimmed)) {
+      setTags([...tags, trimmed]);
+    }
+    setTagInput("");
+    setShowTagDropdown(false);
+    tagInputRef.current?.focus();
+  };
+
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (tagInput.trim()) addTag(tagInput);
+    } else if (e.key === "Escape") {
+      setShowTagDropdown(false);
+    }
+  };
 
   // Ensure controlled input when switching type
   const handleImageTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -81,6 +117,7 @@ export default function AddRecipePage() {
       formData.append("title", title);
       formData.append("description", description);
       formData.append("ingredients", JSON.stringify(ingredients));
+      formData.append("tags", JSON.stringify(tags));
       if (imageType === "file" && image) {
         formData.append("image", image);
       } else if (imageType === "url" && imageUrlInput) {
@@ -98,6 +135,8 @@ export default function AddRecipePage() {
       setTitle("");
       setDescription("");
       setIngredients([{ name: "", quantity: "", unit: "" }]);
+      setTags([]);
+      setTagInput("");
       setImage(null);
       setImageUrlInput("");
       setImageType("url");
@@ -295,6 +334,58 @@ export default function AddRecipePage() {
         <button type="submit" disabled={loading} className={styles.full}>
           {loading ? "Adding..." : "Add Recipe"}
         </button>
+        <div className={styles.field + " " + styles.full}>
+          <label>Tags</label>
+          <div className={styles.tagPillsRow}>
+            {tags.map((tag) => (
+              <span key={tag} className={styles.tagPill}>
+                {tag}
+                <button
+                  type="button"
+                  onClick={() => setTags(tags.filter((t) => t !== tag))}
+                  aria-label={`Remove tag ${tag}`}
+                >
+                  &times;
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className={styles.tagInputWrapper}>
+            <input
+              ref={tagInputRef}
+              type="text"
+              placeholder="Type to search or create a tag, press Enter to add"
+              value={tagInput}
+              onChange={(e) => {
+                setTagInput(e.target.value);
+                setShowTagDropdown(true);
+              }}
+              onFocus={() => setShowTagDropdown(true)}
+              onBlur={() => setTimeout(() => setShowTagDropdown(false), 150)}
+              onKeyDown={handleTagKeyDown}
+              autoComplete="off"
+            />
+            {showTagDropdown &&
+              (filteredTags.length > 0 || tagInput.trim()) && (
+                <ul className={styles.tagDropdown}>
+                  {filteredTags.map((t) => (
+                    <li key={t} onMouseDown={() => addTag(t)}>
+                      {t}
+                    </li>
+                  ))}
+                  {tagInput.trim() &&
+                    !availableTags.includes(tagInput.trim()) && (
+                      <li
+                        className={styles.tagDropdownNew}
+                        onMouseDown={() => addTag(tagInput)}
+                      >
+                        Create &ldquo;{tagInput.trim()}&rdquo;
+                      </li>
+                    )}
+                </ul>
+              )}
+          </div>
+        </div>
       </form>
     </div>
   );
