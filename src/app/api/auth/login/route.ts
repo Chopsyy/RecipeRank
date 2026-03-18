@@ -3,12 +3,12 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const { username, password } = body ?? {};
+  const { email, password } = body ?? {};
 
-  if (typeof username !== "string" || typeof password !== "string")
+  if (typeof email !== "string" || typeof password !== "string")
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
 
-  const user = verifyPassword(username, password);
+  const user = verifyPassword(email, password);
   if (!user)
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
 
