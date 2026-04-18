@@ -138,7 +138,10 @@ export default function RecipeDetailPage() {
       <div className={styles.section}>
         <h3>Ratings</h3>
         <div className={styles.ratings}>
-          <RatingStars score={score} onRate={authUser ? setScore : undefined} />
+          <RatingStars
+            score={score || Math.round(avgRating)}
+            onRate={authUser ? setScore : undefined}
+          />
           <span>
             Average: {avgRating.toFixed(1)} ({ratings.length} ratings)
           </span>
