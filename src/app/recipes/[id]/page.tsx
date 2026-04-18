@@ -16,7 +16,7 @@ export default function RecipeDetailPage() {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [score, setScore] = useState(5);
+  const [score, setScore] = useState(0);
   const [ratingUser, setRatingUser] = useState<"me" | "gf">("me");
   const authUser = useAuthUser();
   const [commentText, setCommentText] = useState("");
@@ -138,21 +138,29 @@ export default function RecipeDetailPage() {
       <div className={styles.section}>
         <h3>Ratings</h3>
         <div className={styles.ratings}>
-          <RatingStars score={score} onRate={setScore} />
+          <RatingStars score={score} onRate={authUser ? setScore : undefined} />
           <span>
             Average: {avgRating.toFixed(1)} ({ratings.length} ratings)
           </span>
-          <select
-            className={styles.formInput}
-            value={ratingUser}
-            onChange={(e) => setRatingUser(e.target.value as "me" | "gf")}
-          >
-            <option value="me">Me</option>
-            <option value="gf">Girlfriend</option>
-          </select>
-          <button className={styles.formButton} onClick={handleAddRating}>
-            Add Rating
-          </button>
+          {authUser && (
+            <>
+              <select
+                className={styles.formInput}
+                value={ratingUser}
+                onChange={(e) => setRatingUser(e.target.value as "me" | "gf")}
+              >
+                <option value="me">Me</option>
+                <option value="gf">Girlfriend</option>
+              </select>
+              <button
+                className={styles.formButton}
+                onClick={handleAddRating}
+                disabled={score === 0}
+              >
+                Add Rating
+              </button>
+            </>
+          )}
         </div>
       </div>
       <div className={styles.comments}>
