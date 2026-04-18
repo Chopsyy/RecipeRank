@@ -3,6 +3,24 @@ import { COOKIE_NAME, verifySessionValue } from "@/lib/auth";
 import { readData, writeData } from "@/lib/blob";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import sanitizeHtml from "sanitize-html";
+
+const ALLOWED_HTML: sanitizeHtml.IOptions = {
+  allowedTags: [
+    "p",
+    "br",
+    "strong",
+    "em",
+    "s",
+    "h1",
+    "h2",
+    "h3",
+    "ul",
+    "ol",
+    "li",
+  ],
+  allowedAttributes: {},
+};
 
 export async function GET() {
   const data = await readData();
@@ -23,7 +41,8 @@ export async function POST(request: Request) {
 
   const formData = await request.formData();
   const title = formData.get("title") as string;
-  const description = formData.get("description") as string;
+  const rawDescription = formData.get("description") as string;
+  const description = sanitizeHtml(rawDescription ?? "", ALLOWED_HTML);
   const ingredients = JSON.parse(formData.get("ingredients") as string);
   const tagsRaw = formData.get("tags") as string | null;
   const tags: string[] = tagsRaw ? JSON.parse(tagsRaw) : [];

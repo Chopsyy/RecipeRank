@@ -95,7 +95,10 @@ export default function RecipeDetailPage() {
           />
         )}
       </div>
-      <p className={styles.description}>{recipe.description}</p>
+      <div
+        className={styles.description}
+        dangerouslySetInnerHTML={{ __html: recipe.description ?? "" }}
+      />
       <div className={styles.ingredientsSection}>
         <h3 className={styles.ingredientsLabel}>Ingredients</h3>
         <ul className={styles.ingredientsList}>

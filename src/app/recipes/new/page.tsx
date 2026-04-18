@@ -3,6 +3,7 @@ import { useAuthUser } from "@/hooks/useAuthUser";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import styles from "@/styles/AddRecipe.module.scss";
+import RichTextEditor from "@/components/RichTextEditor";
 
 export default function AddRecipePage() {
   const user = useAuthUser();
@@ -221,13 +222,8 @@ export default function AddRecipePage() {
           </div>
         )}
         <div className={styles.field + " " + styles.full}>
-          <label htmlFor="description">Description</label>
-          <textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Description"
-          />
+          <label>Description</label>
+          <RichTextEditor value={description} onChange={setDescription} />
         </div>
         <div className={styles.field + " " + styles.full}>
           <label>Ingredients</label>
