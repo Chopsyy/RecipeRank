@@ -79,6 +79,11 @@ export default function RecipeDetailPage() {
   return (
     <div className={styles.detail}>
       <div className={styles.headerSection}>
+        {authUser === recipe.userId && (
+          <a href={`/recipes/${id}/edit`} className={styles.editButton}>
+            Edit Recipe
+          </a>
+        )}
         <h1 className={styles.title}>{recipe.title}</h1>
         {recipe.imageUrl && (
           <Image
