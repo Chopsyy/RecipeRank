@@ -67,13 +67,21 @@ export async function POST(request: Request) {
     }[],
   };
 
-  const data = await readData();
-  data.recipes.push(newRecipe);
-  // Merge new tags into global tag list
-  const tagSet = new Set(data.tags);
-  for (const tag of tags) tagSet.add(tag);
-  data.tags = Array.from(tagSet).sort();
-  await writeData(data);
+  try {
+    const data = await readData();
+    data.recipes.push(newRecipe);
+    // Merge new tags into global tag list
+    const tagSet = new Set(data.tags);
+    for (const tag of tags) tagSet.add(tag);
+    data.tags = Array.from(tagSet).sort();
+    await writeData(data);
+  } catch (err) {
+    console.error("Failed to save recipe:", err);
+    return NextResponse.json(
+      { error: "Failed to save recipe" },
+      { status: 500 },
+    );
+  }
 
   return NextResponse.json(newRecipe, { status: 201 });
 }
