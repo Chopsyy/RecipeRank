@@ -101,7 +101,16 @@ export const RecipeCard: React.FC<Props> = ({
           ))}
         </ul>
       </div>
-      <p className={styles.description}>{recipe.description}</p>
+      <p className={styles.description}>
+        {recipe.description
+          ? recipe.description
+              .replace(/<[^>]*>/g, " ")
+              .replace(/\s+/g, " ")
+              .trim()
+              .slice(0, 150) +
+            (recipe.description.replace(/<[^>]*>/g, "").length > 150 ? "…" : "")
+          : ""}
+      </p>
       {recipe.tags && recipe.tags.length > 0 && (
         <div className={styles.tagsRow}>
           {recipe.tags.map((tag) => (
