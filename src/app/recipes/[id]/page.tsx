@@ -104,6 +104,15 @@ export default function RecipeDetailPage() {
         className={styles.description}
         dangerouslySetInnerHTML={{ __html: recipe.description ?? "" }}
       />
+      {recipe.tags && recipe.tags.length > 0 && (
+        <div className={styles.tagsRow}>
+          {recipe.tags.map((tag) => (
+            <span key={tag} className={styles.tagPill}>
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
       <div className={styles.ingredientsSection}>
         <h3 className={styles.ingredientsLabel}>Ingredients</h3>
         <ul className={styles.ingredientsList}>

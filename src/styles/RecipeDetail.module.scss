@@ -153,6 +153,23 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
+.tagsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.tagPill {
+  padding: 0.2em 0.75em;
+  background: #2d3a4a;
+  color: #90cdf4;
+  border: 1px solid #3b5068;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
 .ratings {
   display: flex;
   align-items: center;
